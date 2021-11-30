@@ -1,7 +1,7 @@
 #ifndef ROCKNROLL_BITONIC_HPP
 #define ROCKNROLL_BITONIC_HPP
 
-#include "utils-sse.hpp"
+#include "simdhelpers/utils-sse.hpp"
 
 enum class MemLayout {
     SEP,

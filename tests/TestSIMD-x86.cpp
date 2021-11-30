@@ -5,10 +5,10 @@
 #include <immintrin.h>
 #include <emmintrin.h>
 
-#include "utils-sse.hpp"
-#include "compress/compress-sse.hpp"
-#include "array_utils.hpp"
-#include "simd-wrapper.hpp"
+#include <simdhelpers/utils-sse.hpp>
+#include <simdhelpers/compress/compress-sse.hpp>
+#include <simdhelpers/array_utils.hpp>
+#include <simdhelpers/simd-wrapper.hpp>
 
 #ifdef __SSE4_2__
 using SSEFun1 = std::function<__m128i(__m128i)>;
@@ -72,34 +72,45 @@ TEST_CASE("SSE - vec_left_32x4()") {
     REQUIRE(SIMDWrapper(right) == SIMDWrapper(expected));
 }
 
-void test_compress_case(std::initializer_list<int> input, std::initializer_list<int> expected) {
-    
-    int input_arr[4];
-    int expected_arr[4];
 
+using CompressFun = std::function<int(__m128i, __m128i, __m128i&)>;
+
+template <typename T, size_t Entries>
+void test_compress_case(std::initializer_list<int> input, std::initializer_list<int> expected,
+			const CompressFun& fun) {
+    
+    alignas(16) T input_arr[16];
+    alignas(16) T expected_arr[16];
+    alignas(16) T mask_arr[16];
+    
     size_t len;
-    build_array(input_arr, 4, len, input);
-    build_array(expected_arr, 4, len, expected);
+
+    std::fill(input_arr, input_arr + 16, 0);
+    std::fill(expected_arr, expected_arr + 16, 0);
+	
+    build_array(input_arr, Entries, len, input);
+    build_array(expected_arr, Entries, len, expected);
+    
+    __m128i u = _mm_load_si128((__m128i*)input_arr);
+    __m128i expected_v = _mm_load_si128((__m128i*)expected_arr);
 
     int nonzero_cnt = 0;
-    for (auto val: expected) {
-	if (val != 0) {
+    for (size_t i = 0; i < Entries; i++) {
+	if (input_arr[i] != 0) {
+	    mask_arr[i] = -1;
 	    nonzero_cnt++;
+	} else {
+	    mask_arr[i] = 0;
 	}
     }
     
-    __m128i u = _mm_set_epi32(input_arr[3], input_arr[2], input_arr[1], input_arr[0]);
-    __m128i expected_v = _mm_set_epi32(expected_arr[3], expected_arr[2], expected_arr[1],
-				       expected_arr[0]);
-
-    __m128i zero = _mm_set1_epi32(0);
-    __m128i mask = _mm_cmpgt_epi32(u, zero);
+    __m128i mask = _mm_load_si128((__m128i*)mask_arr);
     
     __m128i res;
-    int popcnt = compress::sse::compress_32x4(u, mask, res);
+    int popcnt = fun(u, mask, res);
 
     REQUIRE(popcnt == nonzero_cnt);
-    REQUIRE(SIMDWrapper(res) == SIMDWrapper(expected_v));
+    REQUIRE(SIMDWrapper<sizeof(T)>(res) == SIMDWrapper<sizeof(T)>(expected_v));
 }
 
 
@@ -138,19 +149,24 @@ void test_compress_16x8(std::initializer_list<int16_t> input, std::initializer_l
 
 TEST_CASE("SSE - Compress 32x4") {
     SECTION("Compress nothing") {
-	test_compress_case({1, 2, 3, 4}, {1, 2, 3, 4});	
+	test_compress_case<int32_t, 4>({1, 2, 3, 4}, {1, 2, 3, 4},
+				       compress::sse::compress_32x4);
     }
     SECTION ("Compress everything") {
-	test_compress_case({0, 0, 0, 0}, {0, 0, 0, 0});
+	test_compress_case<int32_t, 4>({0, 0, 0, 0}, {0, 0, 0, 0},
+				       compress::sse::compress_32x4);
     }
     SECTION("Compress some") {
-	test_compress_case({1, 3, 0, 4}, {1, 3, 4, 0});
+	test_compress_case<int32_t, 4>({1, 3, 0, 4}, {1, 3, 4, 0},
+				       compress::sse::compress_32x4);
     }
     SECTION("Compress begining") {
-	test_compress_case({0, 0, 1, 2}, {1, 2, 0, 0});
+	test_compress_case<int32_t, 4>({0, 0, 1, 2}, {1, 2, 0, 0},
+				       compress::sse::compress_32x4);
     }
     SECTION ("Compress end") {
-	test_compress_case({1, 2, 3, 0}, {1, 2, 3, 0});
+	test_compress_case<int32_t, 4>({1, 2, 3, 0}, {1, 2, 3, 0},
+				       compress::sse::compress_32x4);
     }
 }
 

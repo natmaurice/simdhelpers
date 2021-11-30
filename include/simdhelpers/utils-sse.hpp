@@ -12,7 +12,7 @@
 #include <ostream>
 #include <cassert>
 
-#include "array_utils.hpp"
+#include "simdhelpers/array_utils.hpp"
 
 
 typedef int8_t  s8x16 __attribute__((vector_size (16)));
@@ -48,12 +48,22 @@ inline __m128i invert_32x2x2(__m128i in) {
     return _mm_shuffle_epi32(in, 0b01'00'11'10);
 }
 
+
+inline __m128i vec_right_8x16(__m128i u, __m128i v) {
+    return _mm_alignr_epi8(v, u, 15);
+}
+
 inline __m128i vec_right_16x8(__m128i u, __m128i v) {
     return _mm_alignr_epi8(v, u, 14);
 }
 
 inline __m128i vec_right_32x4(__m128i u, __m128i v) {
     return _mm_alignr_epi8(v, u, 12);
+}
+
+
+inline __m128i vec_left_8x16(__m128i u, __m128i v) {
+    return _mm_alignr_epi8(v, u, 1);
 }
 
 inline __m128i vec_left_16x8(__m128i u, __m128i v) {
@@ -63,6 +73,7 @@ inline __m128i vec_left_16x8(__m128i u, __m128i v) {
 inline __m128i vec_left_32x4(__m128i u, __m128i v) {    
     return _mm_alignr_epi8(v, u, 4);
 }
+
 
 inline __m128i interleave_lo_32x4(__m128i u, __m128i v) {
     v = _mm_bslli_si128(v, 4);
@@ -86,6 +97,11 @@ inline __m128i filter_hi_32x4(__m128i u, __m128i v) {
     __m128i r = interleave_hi_32x4(u, v);
     r = _mm_shuffle_epi32(r, 0b11'01'10'00);
     return r;    
+}
+
+inline int movemask_8x16(__m128i a) {
+    // Function is not very useful but is here for consistency
+    return _mm_movemask_epi8(a);
 }
 
 inline int movemask_16x8(__m128i a) {
@@ -157,13 +173,13 @@ inline void print_8x16(__m128i in) {
     }
 }
 
+}
+
 inline std::ostream& operator<<(std::ostream& out, __m128i in) {
     alignas(16) int32_t vals[4];
     _mm_store_si128((__m128i*)vals, in);
     out << "[" << vals[0] << ", " << vals[1] << ", " << vals[2] << ", " << vals[3] << "]";
     return out;
-}
-
 }
 
 #endif // ROCKNROLL_UTILS_SSE_HPP

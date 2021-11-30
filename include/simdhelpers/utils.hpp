@@ -21,4 +21,21 @@ constexpr size_t roundup_kpow2(size_t n, int m) {
     return (n + (m - 1)) & -m;
 }
 
+constexpr uint32_t ilog2(uint32_t n) {
+    return 31 - __builtin_clz(n);
+}
+
+
+inline int isqrt(int n) {
+    int i = 0;
+
+    // (Very) Naive approach. This shouldn't be used for performance critical functions
+    do {
+	i++;
+    } while (i * i < n);
+    
+    return i - 1;
+}
+
+
 #endif // ROCKNROLL_UTILS_HPP

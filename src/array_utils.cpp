@@ -1,4 +1,4 @@
-#include "array_utils.hpp"
+#include "simdhelpers/array_utils.hpp"
 
 double calc_pmerge(size_t len0, size_t len1, size_t union_count) {
 

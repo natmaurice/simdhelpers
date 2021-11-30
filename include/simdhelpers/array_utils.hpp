@@ -51,6 +51,17 @@ void print_intervals(std::ostream& out, const T* arr, size_t len) {
 double calc_pmerge(size_t len0, size_t len1, size_t union_count);
 double calc_pmerge(double avglen0, double avglen1, double pmerge);
 
+template <typename T>
+size_t count_nonzero(T arr[], size_t len) {
+    size_t cnt = 0;
+    for (size_t i = 0; i < len; i++){
+	if (arr[i] != 0) {
+	    cnt++;
+	}
+    }
+    return cnt;
+}
+
 template <typename T, typename U>
 bool build_array(T* arr, size_t max_len, size_t &len, std::initializer_list<U> elements) {
     size_t i = 0;
@@ -77,6 +88,26 @@ bool build_array_from_pairs(T* arr, size_t max_len, size_t &len, std::initialize
     }
     len = i;
     return true;
+}
+
+template <typename T>
+void build_array_from_bits(T* arr, size_t len, int bits) {
+    for (size_t i = 0; i < len; i++) {
+	arr[i] = (bits & 1) ? 255 : 0;
+	bits >>= 1;
+    }
+}
+
+template <typename T>
+int bits_from_array(T* arr, size_t len) {
+    int m = 0;
+    for (int i = len - 1; i >= 0; i--) {
+	if (arr[i] > 0) {
+	    m |= 1;
+	}
+	m <<= 1;
+    }
+    return m;
 }
 
 // This structure is meant to be used with Catch, when comparing arrays.

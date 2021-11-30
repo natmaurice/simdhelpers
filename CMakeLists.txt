@@ -52,6 +52,22 @@ add_link_options(
 
 #     -fsanitize=address -fno-omit-frame-pointer -fsanitize=undefined
 
-set(COMMON_LIBRARIES "m")
+
+
+file (GLOB simdhelpers_SRCs
+  "${PROJECT_SOURCE_DIR}/src/*.cpp"
+  )
+
+add_library(simdhelpers ${simdhelpers_SRCs})
+add_library(simdhelpers::simdhelpers ALIAS simdhelpers)
+
+
+target_include_directories(simdhelpers
+    PUBLIC
+        $<INSTALL_INTERFACE:include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
 
 add_subdirectory(tests)
