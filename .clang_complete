@@ -1,0 +1,6 @@
+-Iinclude
+-march=skylake-avx512
+-Wall
+-Wextra
+-pedantic
+-std=c++17
