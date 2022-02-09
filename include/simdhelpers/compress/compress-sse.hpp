@@ -16,16 +16,12 @@ extern unsigned char LUT8x16[256 * 256][16];
 
 
 inline int get_mask_32x4(__m128i mask, __m128i& restrict shuffle_mask) {
-    
-    int m = ::sse::movemask_32x4(mask);
-    
+    int m = ::sse::movemask_32x4(mask);    
     shuffle_mask = ((__m128i*)LUT32x4)[m];
     return __builtin_popcount(m);
 }
 
-inline int get_mask_16x8(__m128i mask, __m128i& restrict shuffle_mask) {
-    
-    int m = ::sse::movemask_16x8(mask);    
+inline int get_mask_16x8(int m, __m128i& restrict shuffle_mask) {    
     shuffle_mask = ((__m128i*)LUT16x8)[m];
     return __builtin_popcount(m);
 }
@@ -37,6 +33,7 @@ inline int get_mask_8x16(__m128i mask, __m128i& restrict shuffle_mask) {
 }
 
 
+
 inline int compress_32x4(__m128i a, __m128i mask, __m128i &res) {
     __m128i shuffle_mask;
     int count = get_mask_32x4(mask, shuffle_mask);
@@ -44,11 +41,16 @@ inline int compress_32x4(__m128i a, __m128i mask, __m128i &res) {
     return count;
 }
 
-inline int compress_16x8(__m128i a, __m128i mask, __m128i &res) {
+inline int compress_16x8(__m128i a, int m, __m128i& res) { 
     __m128i shuffle_mask;
-    int count = get_mask_16x8(mask, shuffle_mask);
+    int count = get_mask_16x8(m, shuffle_mask);
     res = _mm_shuffle_epi8(a, shuffle_mask);
-    return count;
+    return count;   
+}
+
+inline int compress_16x8(__m128i a, __m128i mask, __m128i &res) {
+    int m = ::sse::movemask_16x8(mask);
+    return compress_16x8(a, m, res);
 }
 
 inline int compress_8x16(__m128i a, __m128i mask, __m128i& res) {
