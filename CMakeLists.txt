@@ -58,8 +58,18 @@ file (GLOB simdhelpers_SRCs
   "${PROJECT_SOURCE_DIR}/src/*.cpp"
   )
 
+<<<<<<< HEAD
 add_library(simdhelpers ${simdhelpers_SRCs})
 add_library(simdhelpers::simdhelpers ALIAS simdhelpers)
+=======
+
+set(SIMDHELPERS_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+#include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/")
+
+#add_library(simdhelpers ${simdhelpers_SRCs})
+#add_library(simdhelpers::simdhelpers ALIAS simdhelpers)
+>>>>>>> 839ab46 (Removed messages in CMakeLists)
 
 
 target_include_directories(simdhelpers
