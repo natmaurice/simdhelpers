@@ -61,7 +61,6 @@ inline __m128i vec_right_32x4(__m128i u, __m128i v) {
     return _mm_alignr_epi8(v, u, 12);
 }
 
-
 inline __m128i vec_left_8x16(__m128i u, __m128i v) {
     return _mm_alignr_epi8(v, u, 1);
 }

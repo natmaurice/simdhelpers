@@ -123,7 +123,7 @@ inline void bitonic_dual_sse_32x2x2(__m128i& lo, __m128i& hi) {
     //std::cout << "hi = " << hi << "\n\n";
 }
 
-
+__attribute__((noinline))
 inline void bitonic_mix_sse_16x2x4(__m128i& lo, __m128i& hi) {
     __m128i lo0, hi0;
     __m128i lo1, hi1;
