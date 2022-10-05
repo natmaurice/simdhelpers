@@ -21,6 +21,12 @@ constexpr size_t roundup_kpow2(size_t n, int m) {
     return (n + (m - 1)) & -m;
 }
 
+constexpr int roundup_kn(int n, int m) {
+    int remainder = n % m;
+    remainder = remainder == 0 ? m : remainder; // don't round up if n already a multiple of m
+    return n + m - remainder;
+}
+
 constexpr uint32_t ilog2(uint32_t n) {
     return 31 - __builtin_clz(n);
 }
