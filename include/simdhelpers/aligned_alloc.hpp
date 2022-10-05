@@ -4,7 +4,7 @@
 #include <cstddef>
 #include <cstdlib>
 
-#include "utility.hpp"
+#include <simdhelpers/utils.hpp>
 
 template <typename T>
 T* aligned_new(size_t size, size_t alignment);

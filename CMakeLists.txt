@@ -6,78 +6,45 @@ project(simdhelpers VERSION 1.4)
 
 enable_testing()
 
-
 # Export compilation commands.
 # The purpose here is to make retrieving optimisation options easier.
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 
 
-set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED true)
 
-
-set(WARN_FLAGS "-Wall -Wextra -pedantic -Wno-unused-parameter -Wduplicated-branches -Wduplicated-cond -Wdangling-else")
-
-set(ARCH_FLAGS "-march=native")
-
-set(CMAKE_CXX_FLAGS "${WARN_FLAGS} ${ARCH_FLAGS}")
-set(CMAKE_CXX_FLAGS_RELEASE "") # Clear default compiler flags
-
-add_compile_options(
-  -g
-  "$<$<CONFIG:DEBUG>:-O0;-g3;-ggdb;-fsanitize=address;-fno-omit-frame-pointer;-fsanitize=undefined>"
-#  "$<$<CONFIG:DEBUG>:${WARN_FLAGS}>"    
+set(src_dir src)
+set(inc_dir include)
+set(lib_dir lib)
+set(simdhelpers_SRCs
+  ${src_dir}/utils.cpp
+  ${src_dir}/compress.cpp
+  ${src_dir}/expand.cpp
+  ${src_dir}/array_utils.cpp
   )
 
-add_compile_options(
-  "$<$<CONFIG:RELEASE>:-O3;-march=native>"
-  "$<$<CONFIG:RELEASE>:-mtune=native>"
-  "$<$<CONFIG:RELEASE>:-march=native>"
-  "$<$<CONFIG:RELEASE>:-fstrict-aliasing>"
-  "$<$<CONFIG:RELEASE>:-DNDEBUG>"
-#  "$<$<CONFIG:RELEASE>:${WARN_FLAGS}>"
-  )
+set(simdhelpers_dir "${CMAKE_CURRENT_SOURCE_DIR}/")
 
-add_compile_options(
-  "$<$<CONFIG:RelWithDebInfo>:-O3>"
-  "$<$<CONFIG:RelWithDebInfo>:-march=native>"
-#  "$<$<CONFIG:RELEASE>:${WARN_FLAGS}>"
-  )
+set(LIBRARY_OUTPUT_PATH ${lib_dir})
 
 
-add_link_options(
-  -g
-  "$<$<CONFIG:DEBUG>:-O0;-g3;-ggdb;-fsanitize=address;-fno-omit-frame-pointer;-fsanitize=undefined>"    
-  )
+add_library(simdhelpers-obj OBJECT ${simdhelpers_SRCs})
+set_target_properties(simdhelpers-obj PROPERTIES POSITION_INDEPENDENT_CODE ON) # set -fpic
 
-#     -fsanitize=address -fno-omit-frame-pointer -fsanitize=undefined
+add_library(simdhelpers-slib STATIC $<TARGET_OBJECTS:simdhelpers-obj>)
+set_target_properties(simdhelpers-slib PROPERTIES OUTPUT_NAME simdhelpers POSITION_INDEPENDENT_CODE ON) # set -fpic
 
+#list(APPEND lsl_none_target_list simdhelpers-obj simdhelpers-slib)
+#list(APPEND lsl_target_list simdhelpers-obj simdhelpers-slib)
+target_include_directories(simdhelpers-obj PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${inc_dir}/>)
+target_include_directories(simdhelpers-slib PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${inc_dir}/>)
 
-
-file (GLOB simdhelpers_SRCs
-  "${PROJECT_SOURCE_DIR}/src/*.cpp"
-  )
-
-<<<<<<< HEAD
-add_library(simdhelpers ${simdhelpers_SRCs})
-add_library(simdhelpers::simdhelpers ALIAS simdhelpers)
-=======
-
-set(SIMDHELPERS_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-
-#include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include/")
+export(TARGETS simdhelpers-slib NAMESPACE simdhelpers:: FILE "${lib_dir}/cmake/simdhelpers/${target-scalar-name}-config.cmake")
 
 #add_library(simdhelpers ${simdhelpers_SRCs})
 #add_library(simdhelpers::simdhelpers ALIAS simdhelpers)
->>>>>>> 839ab46 (Removed messages in CMakeLists)
 
 
-target_include_directories(simdhelpers
-    PUBLIC
-        $<INSTALL_INTERFACE:include>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/src
-)
-
-add_subdirectory(tests)
+if (SIMDHELPERS_ENABLE_TESTS)
+  add_subdirectory(tests)
+endif()

@@ -9,6 +9,7 @@
 #include <simdhelpers/compress/compress-sse.hpp>
 #include <simdhelpers/array_utils.hpp>
 #include <simdhelpers/simd-wrapper.hpp>
+#include <simdhelpers/expand/expand-sse.hpp>
 
 #ifdef __SSE4_2__
 using SSEFun1 = std::function<__m128i(__m128i)>;
@@ -579,6 +580,42 @@ TEST_CASE("SSE - nm_one_to_16x8") {
 	    //REQUIRE(is_sorted_mix_16x8(v));
 	}
     }
+}
+
+void test_case_expand_32x4(__m128i mask) {
+    __m128i vals = _mm_set_epi32(4, 3, 2, 1);
+    __m128i res;
+    ::expand::sse::expand_32x4(vals, mask, res);
+
+    alignas(16) int m[4];    
+    alignas(16) int32_t arr[4];
+
+    _mm_store_si128((__m128i*)(m), mask);
+    int j = 1;
+    for (int i = 0; i < 4; i++) {
+	if (m[i]) {
+	    arr[i] = j;
+	    j++;
+	} else {
+	    arr[i] = 0;
+	}
+    }
+
+    __m128i expected = _mm_load_si128((__m128i*)(arr));
+    
+    REQUIRE(SIMDWrapper<4>(res) == SIMDWrapper<4>(expected));
+}
+
+TEST_CASE("SSE - expand_32x4")  {
+    SECTION ("None set") {
+	test_case_expand_32x4(_mm_set_epi32(0, 0, 0, 0));
+    }
+    SECTION ("All set") {
+	test_case_expand_32x4(_mm_set_epi32(-1, -1, -1, -1));
+    }
+    SECTION("Some set") {
+	test_case_expand_32x4(_mm_set_epi32(-1, 0, -1, 0));
+    }    
 }
 
 // Exhaustive tests for bitonic merge

@@ -4,20 +4,15 @@ include_directories(
   ${PROJECT_SOURCE_DIR}/tests
   )
 
-<<<<<<< HEAD
 file (GLOB all_SRCs
   "${PROJECT_SOURCE_DIR}/tests/*.cpp"
-  )
-=======
-#link_libraries(simdhelpers)
-message("tests current src dir = ${CMAKE_CURRENT_SOURCE_DIR}")
-message("include dirs = ${SIMDHELPERS_INCLUDE}")
-include_directories("${SIMDHELPERS_INCLUDE}")
->>>>>>> 839ab46 (Removed messages in CMakeLists)
+)
 
-link_libraries(simdhelpers)
+include_directories("${simdhelpers_dir}/include")
 
-add_executable(simdhelpers_tests ${all_SRCs})
+
+add_executable(simdhelpers_tests ${simdhelpers_SRCs} ${tests_SRCs})
+target_link_libraries(simdhelpers_tests PRIVATE simdhelpers-slib)
 target_link_libraries(simdhelpers_tests PRIVATE Catch2::Catch2)
 
 set_target_properties(simdhelpers_tests PROPERTIES OUTPUT_NAME tests)

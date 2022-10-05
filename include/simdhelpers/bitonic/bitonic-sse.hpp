@@ -1,7 +1,7 @@
 #ifndef ROCKNROLL_BITONIC_HPP
 #define ROCKNROLL_BITONIC_HPP
 
-#include "simdhelpers/utils-sse.hpp"
+#include <simdhelpers/utils-sse.hpp>
 
 enum class MemLayout {
     SEP,
@@ -20,7 +20,7 @@ inline int bitonic_sse_32x2x2(__m128i& lo, __m128i& hi);
 
 __m128i bitonic_sse_32x4(__m128i data) {
     // [a b c d] -> [a b d c]
-    data = _mm_shuffle_epi32(data, 0b10'11'01'00);
+    data = _mm_shuffle_epi32(data, 0b10110100);
     
     __m128i hi = _mm_blend_epi16(data, _mm_set1_epi16(0), 0xF0);
     __m128i lo = _mm_blend_epi16(_mm_set1_epi16(0), data , 0xF0);
@@ -104,8 +104,8 @@ inline void bitonic_dual_sse_32x2x2(__m128i& lo, __m128i& hi) {
 
     //std::cout << "mins = " << lo0 << ", maxs = " << hi0 << "\n\n";
 
-    lo1 = _mm_shuffle_epi32(lo0, 0b01'00'11'10);
-    hi1 = _mm_shuffle_epi32(hi0, 0b01'00'11'10);
+    lo1 = _mm_shuffle_epi32(lo0, 0b01001110);
+    hi1 = _mm_shuffle_epi32(hi0, 0b01001110);
 
     //std::cout << "lo1 = " << lo1 << ", hi1 = " << hi1 << std::endl;
     

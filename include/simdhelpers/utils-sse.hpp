@@ -37,7 +37,7 @@ inline __m128i invert_16x8(__m128i in) {
 }
 
 inline __m128i invert_32x4(__m128i in) {
-    return _mm_shuffle_epi32(in, 0b00'01'10'11);
+    return _mm_shuffle_epi32(in, 0b00011011);
 }
 
 inline __m128i invert_16x2x4(__m128i in) {
@@ -45,7 +45,7 @@ inline __m128i invert_16x2x4(__m128i in) {
 }
 
 inline __m128i invert_32x2x2(__m128i in) {
-    return _mm_shuffle_epi32(in, 0b01'00'11'10);
+    return _mm_shuffle_epi32(in, 0b01001110);
 }
 
 
@@ -88,13 +88,13 @@ inline __m128i interleave_hi_32x4(__m128i u, __m128i v) {
 
 inline __m128i filter_lo_32x4(__m128i u, __m128i v) {
     __m128i r = interleave_lo_32x4(u, v);
-    r = _mm_shuffle_epi32(r, 0b11'01'10'00);
+    r = _mm_shuffle_epi32(r, 0b11011000);
     return r;
 }
 
 inline __m128i filter_hi_32x4(__m128i u, __m128i v) {
     __m128i r = interleave_hi_32x4(u, v);
-    r = _mm_shuffle_epi32(r, 0b11'01'10'00);
+    r = _mm_shuffle_epi32(r, 0b11011000);
     return r;    
 }
 
@@ -129,6 +129,15 @@ inline __m128i bcast_first(__m128i a) {
     return _mm_shuffle_epi32(a, 0b00000000);
 
 }
+
+inline __m128i from_mask_32x4(int mask) {
+    return _mm_set_epi32(-((mask >> 3) & 1),
+			 -((mask >> 2) & 1),
+			 -((mask >> 1) & 1),
+			 -( mask & 1));
+}
+
+
 
 inline int count_leq_32x4(__m128i a, __m128i b) {
     // a <= b
