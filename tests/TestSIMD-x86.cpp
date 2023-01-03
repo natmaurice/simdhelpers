@@ -615,7 +615,12 @@ TEST_CASE("SSE - expand_32x4")  {
     }
     SECTION("Some set") {
 	test_case_expand_32x4(_mm_set_epi32(-1, 0, -1, 0));
-    }    
+    }
+
+    for (int i = 0; i < 16; i++) {
+	__m128i mask = ::sse::from_mask_32x4(i);
+	test_case_expand_32x4(mask);
+    }
 }
 
 // Exhaustive tests for bitonic merge
