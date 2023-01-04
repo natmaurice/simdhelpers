@@ -26,7 +26,7 @@ inline int expand_32x4(__m128i a, __m128i mask, __m128i& res) {
 inline int expand_select_2x32x4(__m128i a, __m128i b, __m128i mask, __m128i& res) {
     __m128i shufm0, shufm1;
     int m0 = ::sse::movemask_32x4(mask);
-    int m1 = ~m0;
+    int m1 = (~m0) & 0xf;
     
     shufm0 = _mm_load_si128((__m128i*)(expand_LUT32x4[m0]));
     shufm1 = _mm_load_si128((__m128i*)(expand_LUT32x4[m1]));
