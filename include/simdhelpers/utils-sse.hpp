@@ -157,6 +157,16 @@ inline __m128i to_32x4_sse(std::initializer_list<int> input) {
     return _mm_set_epi32(data[3], data[2], data[1], data[0]);
 }
 
+inline __m128i to_16x8(std::initializer_list<int16_t> input)  {
+    assert(input.size() == 8);
+
+    size_t len;
+    alignas(16) int16_t data[8];
+    build_array(data, 8, len, input);
+
+    return _mm_load_si128((__m128i*)(data));
+}
+
 inline void print_16x8(__m128i in) {
     alignas(16) int16_t vals[8];
     _mm_store_si128((__m128i*)vals, in);

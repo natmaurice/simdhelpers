@@ -207,7 +207,7 @@ void test_simdfun1_32x4(const SSEFun1& fun, std::initializer_list<int> in0,
     REQUIRE(SIMDWrapper(res) == SIMDWrapper(expected));
 }
 
-void test_simdfun1_32x4(const SSEFun2& fun, std::initializer_list<int> in0, std::initializer_list<int> in1,
+void test_simdfun2_32x4(const SSEFun2& fun, std::initializer_list<int> in0, std::initializer_list<int> in1,
 		  std::initializer_list<int> expected_result) {
        
     __m128i a = sse::to_32x4_sse(in0);
@@ -219,23 +219,35 @@ void test_simdfun1_32x4(const SSEFun2& fun, std::initializer_list<int> in0, std:
     REQUIRE(SIMDWrapper(res) == SIMDWrapper(expected));
 }
 
+void test_simdfun2_16x8(const SSEFun2& fun, std::initializer_list<int16_t> in0,
+			std::initializer_list<int16_t> in1,
+			std::initializer_list<int16_t> expected_results) {
+
+    __m128i a = sse::to_16x8(in0);
+    __m128i b = sse::to_16x8(in1);
+    __m128i expected = sse::to_16x8(expected_results);
+
+    __m128i res = fun(a, b);
+
+    REQUIRE(SIMDWrapper<2>(res) == SIMDWrapper<2>(expected));
+}
 
 TEST_CASE("SSE - Interleave") {
     SECTION ("interleave_hi_32x4") {
-	test_simdfun1_32x4(sse::interleave_lo_32x4, {1, 2, 3, 4}, {5, 6, 7, 8}, {1, 5, 3, 7});
+	test_simdfun2_32x4(sse::interleave_lo_32x4, {1, 2, 3, 4}, {5, 6, 7, 8}, {1, 5, 3, 7});
     }
     SECTION ("interleave_lo_32x4") {
-	test_simdfun1_32x4(sse::interleave_hi_32x4, {1, 2, 3, 4}, {5, 6, 7, 8}, {2, 6, 4, 8});
+	test_simdfun2_32x4(sse::interleave_hi_32x4, {1, 2, 3, 4}, {5, 6, 7, 8}, {2, 6, 4, 8});
     }
 }
 
 
 TEST_CASE("SSE - Filter") {
     SECTION ("filter_lo_32x4") {
-	test_simdfun1_32x4(sse::filter_lo_32x4, {1, 2, 3, 4}, {5, 6, 7, 8}, {1, 3, 5, 7});
+	test_simdfun2_32x4(sse::filter_lo_32x4, {1, 2, 3, 4}, {5, 6, 7, 8}, {1, 3, 5, 7});
     }
     SECTION ("filter_hi_32x4") {
-	test_simdfun1_32x4(sse::filter_hi_32x4, {1, 2, 3, 4}, {5, 6, 7, 8}, {2, 4, 6, 8});
+	test_simdfun2_32x4(sse::filter_hi_32x4, {1, 2, 3, 4}, {5, 6, 7, 8}, {2, 4, 6, 8});
     }
 }
 
@@ -622,6 +634,23 @@ TEST_CASE("SSE - expand_32x4")  {
 	test_case_expand_32x4(mask);
     }
 }
+
+/*
+TEST_CASE("SSE - cmp_le_epi16") {
+    SECTION ("Lower") {
+	test_simdfun2_16x8(sse::cmp_le_epi16, {1, 1, 1, 1, 1, 1, 1, 1}, {2, 2, 2, 2, 2, 2, 2, 2},
+			   {-1, -1, -1, -1, -1, -1, -1, -1});
+    }
+    SECTION ("Greater") {
+	test_simdfun2_16x8(sse::cmp_le_epi16, {2, 2, 2, 2, 2, 2, 2, 2}, {1, 1, 1, 1, 1, 1, 1, 1}, 
+			   {0, 0, 0, 0, 0, 0, 0, 0});
+
+    }
+    SECTION("Equal") {
+	test_simdfun2_16x8(sse::cmp_le_epi16, {1, 1, 1, 1, 1, 1, 1, 1}, {1, 1, 1, 1, 1, 1, 1, 1},
+			   {-1, -1, -1, -1, -1, -1, -1, -1});
+    }
+    }*/
 
 // Exhaustive tests for bitonic merge
 void test_bitonic_32x4(const BitonicFun& fun) {
