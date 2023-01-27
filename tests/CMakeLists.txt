@@ -4,14 +4,13 @@ include_directories(
   ${PROJECT_SOURCE_DIR}/tests
   )
 
-file (GLOB all_SRCs
+file (GLOB tests_SRCs
   "${PROJECT_SOURCE_DIR}/tests/*.cpp"
 )
 
 include_directories("${simdhelpers_dir}/include")
 
-
-add_executable(simdhelpers_tests ${simdhelpers_SRCs} ${tests_SRCs})
+add_executable(simdhelpers_tests ${tests_SRCs})
 target_link_libraries(simdhelpers_tests PRIVATE simdhelpers-slib)
 target_link_libraries(simdhelpers_tests PRIVATE Catch2::Catch2)
 

@@ -17,6 +17,7 @@ set(src_dir src)
 set(inc_dir include)
 set(lib_dir lib)
 set(simdhelpers_SRCs
+  ${src_dir}/utils.cpp
   ${src_dir}/compress.cpp
   ${src_dir}/expand.cpp
   ${src_dir}/array_utils.cpp
