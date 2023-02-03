@@ -3,6 +3,31 @@
 #include "simdhelpers/compress/lut.hpp"
 
 
+int LUT_init(unsigned char LUT[], int LUTEntries, int EntrySize) {
+    
+    const int BitsCount = ilog2(LUTEntries);
+    for (int i = 0; i < LUTEntries; i++) {
+	//unsigned char* lut = LUT[i];
+
+	unsigned char* lut = LUT + i * EntrySize;
+	
+	int mask = i;
+	int j = 0;
+	for (int k = 0; k < BitsCount; k++) {
+	    lut[j] = k;
+	    if (mask & 1) {
+		j++;
+	    }
+	    mask >>= 1;	    
+	}
+	for (; j < EntrySize; j++) {
+	    lut[j] = 255;
+	}
+    }
+    return 0;
+}
+
+
 alignas(16) uint8_t LUT32x4[16][16] = {
     {255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255}, 
     {0, 1, 2, 3, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255}, 
@@ -290,7 +315,8 @@ namespace sse {
 
 alignas(16) unsigned char LUT8x16[256 * 256][16];
 
-int init_lut_8x16 = lut_init<256*256, 16>(LUT8x16);
+//int init_lut_8x16 = lut_init<256*256, 16>(LUT8x16);
+int init_lut_8x16 = ::LUT_init((unsigned char*)LUT8x16, 256*256, 16);
 
 }
 

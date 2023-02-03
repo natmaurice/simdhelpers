@@ -147,6 +147,38 @@ void test_compress_16x8(std::initializer_list<int16_t> input, std::initializer_l
     REQUIRE(SIMDWrapper<2>(res) == SIMDWrapper<2>(expected_v));
 }
 
+void test_compress_8x16(std::initializer_list<int16_t> input,
+			std::initializer_list<int8_t> mask,
+			std::initializer_list<int16_t> expected) {
+    
+    alignas(16) uint8_t in[16];
+    alignas(16) uint8_t ex[16];
+    alignas(16) uint8_t m[16];
+
+    assert(input.size() == 16);
+    
+    size_t len;
+    build_array(in, 16, len, input);
+    build_array(ex, 16, len, expected);
+    build_array(m, 16, len, mask);
+
+    
+
+    __m128i u = _mm_load_si128((__m128i*)(in));
+    __m128i expected_v = _mm_load_si128((__m128i*)(ex));
+    
+    __m128i vmask = _mm_load_si128((__m128i*)(m));
+
+    int expected_cnt = __builtin_popcount(_mm_movemask_epi8(vmask));
+
+    
+    __m128i res;
+    int popcnt = compress::sse::compress_8x16(u, vmask, res);
+
+    REQUIRE(popcnt == expected_cnt);
+    REQUIRE(SIMDWrapper<1>(res) == SIMDWrapper<1>(expected_v));
+    
+}
 
 TEST_CASE("SSE - Compress 32x4") {
     SECTION("Compress nothing") {
@@ -195,6 +227,35 @@ TEST_CASE("SSE - Compress 16x8") {
     }
 }
 
+
+TEST_CASE("SSE - Compress 8x16") {
+    SECTION("Compress nothing") {
+	test_compress_8x16({ 1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16},
+			   {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+			   {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16});
+    }
+    SECTION ("Compress everything") {
+	test_compress_8x16({1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16},
+			   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+			   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
+    }
+    SECTION("Compress some") {
+        test_compress_8x16({ 1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16},
+			   {-1,  0, -1, -1,  0, -1, -1,  0,  0,  0,  0, -1, -1,  0, -1, -1},
+			   { 1,  3,  4,  6,  7, 12, 13, 15, 16,  0,  0,  0,  0,  0,  0,  0});
+    }
+    SECTION("Compress begining") {
+        test_compress_8x16({ 1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16},
+			   {-1, -1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0},
+			   { 1,  2,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0});
+    }
+    SECTION ("Compress end") {
+	test_compress_8x16({ 1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16},
+			   { 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, -1, -1, -1},
+			   {14, 15, 16,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0});
+
+    }
+}
 
 void test_simdfun1_32x4(const SSEFun1& fun, std::initializer_list<int> in0,
 		  std::initializer_list<int> expected_result) {
