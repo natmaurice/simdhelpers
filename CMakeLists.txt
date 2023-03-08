@@ -6,10 +6,6 @@ project(simdhelpers VERSION 1.4)
 
 enable_testing()
 
-# Export compilation commands.
-# The purpose here is to make retrieving optimisation options easier.
-set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
-
 
 set(CMAKE_CXX_STANDARD_REQUIRED true)
 
